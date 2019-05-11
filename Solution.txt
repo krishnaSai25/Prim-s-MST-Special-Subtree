@@ -1,0 +1,86 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    static class Node{
+        int position = -1;
+        int source = -1;
+        int dist = Integer.MAX_VALUE;
+    }
+
+    public static void main(String[] args) {
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        
+        PriorityQueue<Node> pq = new PriorityQueue(new Comparator<Node>(){
+            @Override
+            public int compare(Node n1, Node n2){
+                return n1.dist - n2.dist;
+            }
+        });
+        
+        ArrayList<int[]>[] graph = new ArrayList[n+1];
+        HashMap<Integer, Node> map = new HashMap<Integer, Node>();
+        
+        for(int i=0; i<m; i++){
+            int x = sc.nextInt();
+            int y = sc.nextInt();
+            int r = sc.nextInt();
+            int[] to = {y,r};
+            int[] from = {x,r};
+            if(graph[x] == null)
+                graph[x] = new ArrayList<int[]>();            
+            if(graph[y] == null)
+                graph[y] = new ArrayList<int[]>();
+            graph[x].add(to);
+            graph[y].add(from);
+        }
+        
+        int start = sc.nextInt();
+        Node sp = new Node();
+        sp.position = start;
+        sp.source = 0;
+        sp.dist = 0;
+        pq.add(sp);
+        map.put(start, sp);
+        
+        for(int i=1; i<n+1; i++){
+            if(i != start){
+                Node ns = new Node();
+                ns.position = i;
+                pq.add(ns);
+                map.put(i, ns);
+            }
+        }
+        
+        int sum = 0;
+        
+        HashSet<Integer> visited = new HashSet<Integer>();
+        
+        while(!pq.isEmpty()){
+            Node node = pq.poll();
+            visited.add(node.position);
+            
+            if(node.dist == Integer.MAX_VALUE)
+                break;
+            
+            sum+= node.dist;
+            for(int[] arr : graph[node.position]){
+                if(!map.containsKey(arr[0]))
+                    continue;
+                Node ns = map.get(arr[0]);
+                int newDist = arr[1];
+                if(newDist < ns.dist && !visited.contains(ns.position)){
+                    ns.dist = newDist;
+                    ns.source = node.position;
+                    pq.remove(ns);
+                    pq.add(ns);
+                }
+            }
+        }
+        
+        System.out.println(sum);
+    }
+}
